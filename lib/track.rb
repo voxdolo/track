@@ -69,7 +69,7 @@ class Track
   end
 
   def restart
-    entries << Entry.new(Time.now, nil, last_entry.project, last_entry.description)
+    start(last_entry.project, last_entry.description)
   end
 
 end
