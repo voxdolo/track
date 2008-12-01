@@ -15,6 +15,10 @@ class Entry
     @stop_time = Time.now
   end
 
+  def unstop
+    @stop_time = nil
+  end
+
   def to_s
     line = "[#{start_string} - #{stop_string}] "
     line << project if project

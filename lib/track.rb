@@ -24,6 +24,7 @@ class Track
     case argv.first
     when 'stop'   ; stop
     when 'cat'    ; cat
+    when 'delete' ; delete_last
     when 'restart'; restart
     else start(*argv)
     end
@@ -45,6 +46,10 @@ class Track
     entry = Entry.new(Time.now, nil, project, description)
     entries << entry
     entry
+  end
+
+  def delete_last
+    entries.pop
   end
 
   def start(project, *description)

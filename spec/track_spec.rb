@@ -143,6 +143,18 @@ describe Track do
     end
   end
 
+  describe "#delete" do
+    it "should remove the last entry from entries" do
+      track = Track.new
+      entry_one = Entry.new(Time.now, nil, '', '')
+      entry_two = Entry.new(Time.now, nil, '', '')
+      track.entries << entry_one
+      track.entries << entry_two
+      track.delete_last
+      track.entries.should_not include(entry_two)
+    end
+  end
+
   describe "#restart" do
     before do
       @track = Track.new
