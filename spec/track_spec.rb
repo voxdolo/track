@@ -143,6 +143,24 @@ describe Track do
     end
   end
 
+  describe "#restart" do
+    before do
+      @track = Track.new
+      @entry = Entry.new(Time.now, Time.now, '', '')
+      @track.entries << @entry
+    end
+    it "should have the current time as the start time" do
+      time = Time.now
+      Time.stub!(:now).and_return(time)
+      @track.restart
+      @track.last_entry.start_time.should == time
+    end
+    it "should remove the stop time from the last entry" do
+      @track.restart
+      @track.last_entry.stop_time.should be_nil
+    end
+  end
+
   describe "#cat" do
     it "should output each entry as a string on a line to stdout" do
       old, $stdout = $stdout, StringIO.new

@@ -22,8 +22,9 @@ class Track
   def run(argv, options=nil)
     self.options = options
     case argv.first
-    when 'stop' ; stop
-    when 'cat'  ; cat
+    when 'stop'   ; stop
+    when 'cat'    ; cat
+    when 'restart'; restart
     else start(*argv)
     end
   end
@@ -39,7 +40,7 @@ class Track
   def last_entry
     entries.last
   end
-  
+
   def add_entry(project, description=nil)
     entry = Entry.new(Time.now, nil, project, description)
     entries << entry
@@ -60,6 +61,10 @@ class Track
 
   def cat
     $stdout.puts(entries.map{|e|e.to_s}.join("\n"))
+  end
+
+  def restart
+    entries << Entry.new(Time.now, nil, last_entry.project, last_entry.description)
   end
 
 end
