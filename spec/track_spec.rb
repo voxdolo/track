@@ -3,6 +3,7 @@ require File.dirname(__FILE__) + '/spec_helper'
 describe Track do
   before do
     @track = Track.new
+    @track.stub!(:projects).and_return({'project' => "Project"})
 
     @time = Time.now
     @time.stub!(:now).and_return(@time)
@@ -70,32 +71,40 @@ describe Track do
   end
 
   describe "#start" do
+
+    it "should raise unless provided a description" do
+      lambda {
+        @track.start('project')
+      }.should raise_error(TrackError)
+    end
+
     it "should stop any started entry" do
       @track.should_receive(:stop)
-      @track.start('project')
+      @track.start('project', 'description')
     end
 
     it "should create an new entry" do
-      lambda{@track.start('project')}.should change(@track.entries, :size)
+      lambda{
+        @track.start('project', 'description')
+      }.should change(@track.entries, :size)
     end
 
     it "should map a project shortname" do
-      expected =  "Test Project"
-      @track.projects['test'] = expected
-      @track.start('test')
+      expected =  "Project"
+      @track.start('project', 'description')
       @track.last_entry.project.should == expected
     end
 
-    it "should use the given project if it is not a shortname" do
-      expected = 'test'
-      @track.start(expected)
-      @track.last_entry.project.should == expected
+    it "should raise if the project cannot be found" do
+      lambda {
+        @track.start('unknown', 'description')
+      }.should raise_error(TrackError)
     end
 
     it "should concatenate multiple description arguments" do
       actual = %w(tacos are teh awesum)
       expected = 'tacos are teh awesum'
-      @track.start('test', actual)
+      @track.start('project', actual)
       @track.last_entry.description.should == expected
     end
   end
@@ -174,14 +183,36 @@ describe Track do
   end
 
   describe "#cat" do
+    it "should output each day as a header" do
+      old, $stdout = $stdout, StringIO.new
+      @track.add_entry('project')
+      @track.cat
+      $stdout.rewind
+      $stdout.read.should include(@track.last_entry.start_date.to_s + "\n" + "----------" + "\n")
+      $stdout = old
+    end
+
     it "should output each entry as a string on a line to stdout" do
       old, $stdout = $stdout, StringIO.new
       @track.add_entry('project')
       @track.cat
       $stdout.rewind
-      $stdout.read.should == @track.last_entry.to_s + "\n"
+      $stdout.read.should include(@track.last_entry.to_s + "\n")
       $stdout = old
     end
+
+    it "should output the total time of each project per day to stdout" do
+      old, $stdout = $stdout, StringIO.new
+      @track.add_entry('project')
+      @track.stop
+      @track.cat
+      $stdout.rewind
+      output = $stdout.read
+      output.should include("Totals:\n=======\n")
+      output.should include("project:\t")
+      $stdout = old
+    end
+
   end
 end
 
